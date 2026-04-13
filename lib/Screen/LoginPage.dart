@@ -139,8 +139,34 @@ class _LoginPageState extends State<LoginPage> {
 
                         const SizedBox(height: 40),
 
-                        const Text("Forgot Password?",
-                            style: TextStyle(color: Colors.grey)),
+                        GestureDetector(
+                          onTap: () {
+                            if (contactController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Please enter your Email or Phone first")),
+                              );
+                            } else {
+                              // Reusing the OTP flow for password reset simulation
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VerifyCode(
+                                    verificationId: "reset_session_456",
+                                    isForgotPassword: true, // We can add this flag to VerifyCode
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: const Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
 
                         const SizedBox(height: 40),
 

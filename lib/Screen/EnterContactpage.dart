@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_controller.dart';
 import 'VerifyCode.dart';
@@ -349,79 +348,8 @@ class _EnterContactPageState extends ConsumerState<EnterContactPage> {
               ),
             ),
           ),
-=======
-import 'VerifyCode.dart';
-
-class EnterContactPage extends StatelessWidget {
-  const EnterContactPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.blue,
-              Colors.yellow,
-              Colors.green,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-            "Sign Up",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-            const SizedBox(height: 40),
-
-            const Text(
-              "Enter your email or phone",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 20),
-
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Email or Phone",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const VerifyCode(),
-                  ),
-                );
-              },
-              child: const Text("Send Code"),
-            ),
-
-          ],
->>>>>>> 61434a2692d502bb423a0275732ad9686c542c8d
         ),
       ),
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 61434a2692d502bb423a0275732ad9686c542c8d
