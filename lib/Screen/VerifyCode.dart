@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_controller.dart';
 
@@ -20,10 +21,16 @@ class _VerifyCodeState extends ConsumerState<VerifyCode> {
     codeController.dispose();
     super.dispose();
   }
+=======
+
+class VerifyCode extends StatelessWidget {
+  const VerifyCode({super.key});
+>>>>>>> 61434a2692d502bb423a0275732ad9686c542c8d
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -177,8 +184,68 @@ class _VerifyCodeState extends ConsumerState<VerifyCode> {
               ),
             ),
           ),
+=======
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.blue,
+              Colors.yellow,
+              Colors.green,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "Code Verification",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            const Text(
+              "We sent a 6-digit code",
+              style: TextStyle(color: Colors.black),
+            ),
+
+            const SizedBox(height: 20),
+
+            TextField(
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Verify"),
+            ),
+
+          ],
+>>>>>>> 61434a2692d502bb423a0275732ad9686c542c8d
         ),
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 61434a2692d502bb423a0275732ad9686c542c8d
