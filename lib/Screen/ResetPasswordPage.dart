@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'LoginPage.dart';
 
-class ResetPasswordPage extends StatefulWidget {
+class ResetPasswordPage extends ConsumerStatefulWidget {
   const ResetPasswordPage({super.key});
 
   @override
-  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
+  ConsumerState<ResetPasswordPage> createState() => _ResetPasswordPageState();
 }
 
-class _ResetPasswordPageState extends State<ResetPasswordPage> {
+class _ResetPasswordPageState extends ConsumerState<ResetPasswordPage> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
   bool isLoading = false;
+
+  @override
+  void dispose() {
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   void _handleReset() async {
     if (passwordController.text.isEmpty || confirmPasswordController.text.isEmpty) {
