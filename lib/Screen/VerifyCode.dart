@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_controller.dart';
 import 'ResetPasswordPage.dart';
+import 'DashboardPage.dart';
 
 class VerifyCode extends ConsumerStatefulWidget {
   final String verificationId;
@@ -120,7 +121,7 @@ class _VerifyCodeState extends ConsumerState<VerifyCode> {
                                       }
                                       setState(() => isLoading = true);
 
-                                      await ref.read(authControllerProvider).verifyOtp(
+                                      await ref.read(authControllerProvider.notifier).verifyOtp(
                                         verificationId: widget.verificationId,
                                         smsCode: codeController.text,
                                         onSuccess: () {
@@ -140,8 +141,12 @@ class _VerifyCodeState extends ConsumerState<VerifyCode> {
                                               MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
                                             );
                                           } else {
-                                            // TODO: Navigate to Home Page
-                                            print("Navigate to Home Page");
+                                            // Navigate to Dashboard and clear history
+                                            Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const DashboardPage()),
+                                              (route) => false,
+                                            );
                                           }
                                         },
                                         onError: (error) {

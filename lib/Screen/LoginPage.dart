@@ -163,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 25),
                       Align(
-                        alignment: Alignment.centerRight,
+                        alignment: Alignment.center,
                         child: TextButton(
                           onPressed: () {
                             if (contactController.text.isEmpty) {

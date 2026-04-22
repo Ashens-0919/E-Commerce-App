@@ -277,7 +277,7 @@ class _EnterContactPageState extends ConsumerState<EnterContactPage> {
 
     setState(() => isLoading = true);
     
-    final auth = ref.read(authControllerProvider);
+    final auth = ref.read(authControllerProvider.notifier);
     
     if (isPhoneSelected) {
       await auth.sendOtp(

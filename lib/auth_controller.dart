@@ -1,15 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:firebase_auth/firebase_auth.dart'; // Temporarily disabled
 
 // Provider for AuthController
-final authControllerProvider = Provider<AuthController>((ref) {
+final authControllerProvider = StateNotifierProvider<AuthController, bool>((ref) {
   return AuthController();
 });
 
-class AuthController {
-  // final FirebaseAuth _auth; // Temporarily disabled
-
-  AuthController();
+class AuthController extends StateNotifier<bool> {
+  // state = false means logged out, state = true means logged in
+  AuthController() : super(false);
 
   // Send OTP to Phone
   Future<void> sendOtp({
@@ -18,25 +16,8 @@ class AuthController {
     required Function(String error) onError,
   }) async {
     try {
-      // FOR NOW: We will simulate a successful send to avoid crashes without Firebase
       await Future.delayed(const Duration(seconds: 2));
       onCodeSent("phone_verify_session_123"); 
-      
-      /* Real Firebase Logic:
-      await _auth.verifyPhoneNumber(
-        phoneNumber: contact,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await _auth.signInWithCredential(credential);
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          onError(e.message ?? "Verification failed");
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          onCodeSent(verificationId);
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {},
-      );
-      */
     } catch (e) {
       onError(e.toString());
     }
@@ -49,7 +30,6 @@ class AuthController {
     required Function(String error) onError,
   }) async {
     try {
-      // Simulate successful send
       await Future.delayed(const Duration(seconds: 2));
       onCodeSent("email_verify_session_123"); 
     } catch (e) {
@@ -65,23 +45,18 @@ class AuthController {
     required Function(String error) onError,
   }) async {
     try {
-      // FOR NOW: Use dummy code "123456" for both
       if (smsCode == "123456") {
+        state = true; // LOGGED IN SUCCESS
         onSuccess();
       } else {
         onError("Invalid code (Try 123456)");
       }
-      
-      /* Real Firebase Logic:
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
-      await _auth.signInWithCredential(credential);
-      onSuccess();
-      */
     } catch (e) {
       onError(e.toString());
     }
+  }
+
+  void logout() {
+    state = false; // LOGGED OUT
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'Screen/LoginPage.dart';
+import 'Screen/DashboardPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +18,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Auth App',
+      title: 'E-Commerce App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
       ),
-      home: const LoginPage(), // Set LoginPage as the initial screen
+      home: const DashboardPage(), // App now starts at the Dashboard
     );
   }
 }
