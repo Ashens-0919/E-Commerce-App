@@ -1,13 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Provider for AuthController
-final authControllerProvider = StateNotifierProvider<AuthController, bool>((ref) {
+class UserModel {
+  final String uid;
+  final String contact;
+  final String name;
+
+  UserModel({required this.uid, required this.contact, this.name = "Verified User"});
+}
+
+final authControllerProvider = StateNotifierProvider<AuthController, UserModel?>((ref) {
   return AuthController();
 });
 
-class AuthController extends StateNotifier<bool> {
-  // state = false means logged out, state = true means logged in
-  AuthController() : super(false);
+class AuthController extends StateNotifier<UserModel?> {
+  AuthController() : super(null);
 
   // Send OTP to Phone
   Future<void> sendOtp({
@@ -41,12 +47,13 @@ class AuthController extends StateNotifier<bool> {
   Future<void> verifyOtp({
     required String verificationId,
     required String smsCode,
+    required String contact, // Added to create the user model
     required Function() onSuccess,
     required Function(String error) onError,
   }) async {
     try {
       if (smsCode == "123456") {
-        state = true; // LOGGED IN SUCCESS
+        state = UserModel(uid: "user_abc_123", contact: contact);
         onSuccess();
       } else {
         onError("Invalid code (Try 123456)");
@@ -57,6 +64,6 @@ class AuthController extends StateNotifier<bool> {
   }
 
   void logout() {
-    state = false; // LOGGED OUT
+    state = null;
   }
 }

@@ -6,11 +6,13 @@ import 'DashboardPage.dart';
 
 class VerifyCode extends ConsumerStatefulWidget {
   final String verificationId;
+  final String contact; // Added to pass to verifyOtp
   final bool isForgotPassword;
 
   const VerifyCode({
     super.key,
     required this.verificationId,
+    required this.contact,
     this.isForgotPassword = false,
   });
 
@@ -124,6 +126,7 @@ class _VerifyCodeState extends ConsumerState<VerifyCode> {
                                       await ref.read(authControllerProvider.notifier).verifyOtp(
                                         verificationId: widget.verificationId,
                                         smsCode: codeController.text,
+                                        contact: widget.contact,
                                         onSuccess: () {
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(

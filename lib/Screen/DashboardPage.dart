@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth_controller.dart';
-import 'LoginPage.dart';
+import '../cart_provider.dart';
 import 'ProfilePage.dart';
+import 'SearchPage.dart';
+import 'CartPage.dart';
+import '../widgets/FigmaProductCard.dart';
+import '../wishlist_provider.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -16,18 +20,28 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const Center(child: Text("Search Page", style: TextStyle(fontSize: 24))),
-    const Center(child: Text("Cart Page", style: TextStyle(fontSize: 24))),
+    const WishlistScreen(), // Replaced Search Tab with Wishlist
+    const CartPage(),
     const ProfilePage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blueAccent, Colors.yellowAccent, Colors.blueAccent],
+          ),
+        ),
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -35,159 +49,199 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.blueAccent,
         unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: "Cart"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        backgroundColor: Colors.white,
+        elevation: 10,
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: "Home"),
+          const BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: "Wishlist"),
+          BottomNavigationBarItem(
+            icon: Badge(
+              label: Consumer(builder: (context, ref, _) {
+                final cart = ref.watch(cartProvider);
+                return Text("${cart.length}");
+              }),
+              child: const Icon(Icons.shopping_cart),
+            ),
+            label: "Cart"
+          ),
+          const BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
     );
   }
 }
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isLoggedIn = ref.watch(authControllerProvider);
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String selectedCategory = "All";
+
+  final List<Map<String, dynamic>> allProducts = [
+    {
+      "id": "1", 
+      "name": "Modern Gray Sofa", 
+      "price": 1299.99, 
+      "category": "Furniture", 
+      "icon": Icons.chair,
+      "variantType": "Color",
+      "variants": ["Gray", "Charcoal", "Navy", "Velvet Red"]
+    },
+    {
+      "id": "2", 
+      "name": "Wireless Headphones", 
+      "price": 99.0, 
+      "icon": Icons.headphones, 
+      "category": "Electronics",
+      "variantType": "Color",
+      "variants": ["Black", "Silver", "Rose Gold"]
+    },
+    {
+      "id": "3", 
+      "name": "Smart Watch", 
+      "price": 150.0, 
+      "icon": Icons.watch, 
+      "category": "Electronics",
+      "variantType": "Size",
+      "variants": ["40mm", "44mm", "45mm"]
+    },
+    {
+      "id": "4", 
+      "name": "Running Shoes", 
+      "price": 75.0, 
+      "icon": Icons.directions_run, 
+      "category": "Shoes",
+      "variantType": "Size",
+      "variants": ["US 8", "US 9", "US 10", "US 11"]
+    },
+    {
+      "id": "5", 
+      "name": "iPhone 15", 
+      "price": 999.0, 
+      "icon": Icons.phone_iphone, 
+      "category": "Electronics",
+      "variantType": "Storage",
+      "variants": ["128GB", "256GB", "512GB"]
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(authControllerProvider);
+    final isLoggedIn = user != null;
+
+    List<Map<String, dynamic>> filteredProducts = selectedCategory == "All"
+        ? allProducts
+        : allProducts.where((p) => p['category'] == selectedCategory).toList();
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(isLoggedIn ? "Welcome back!" : "Hello, Guest!", 
-                      style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                    const Text("Find your best gear", 
-                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                Container(
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                  padding: const EdgeInsets.all(8),
-                  child: const Icon(Icons.notifications_none, color: Colors.black),
-                )
-              ],
-            ),
-            const SizedBox(height: 25),
-
-            // Search Bar
-            TextField(
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "Search products...",
-                prefixIcon: const Icon(Icons.search, color: Colors.blueAccent),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(isLoggedIn ? "Welcome back, ${user.name}!" : "Hello, Guest!",
+                        style: const TextStyle(fontSize: 14, color: Colors.white70)),
+                      const Text("Find your best gear", 
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(Icons.notifications_none, color: Colors.white),
+                  )
+                ],
               ),
             ),
             const SizedBox(height: 25),
 
-            // Promo Banner
+            // Functional Search Bar (Now opens full screen SearchPage)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SearchPage()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.blueAccent),
+                      SizedBox(width: 10),
+                      Text("Search products...", style: TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            // Content Area
             Container(
               width: double.infinity,
-              height: 150,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
+              padding: const EdgeInsets.all(25),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
               ),
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Positioned(
-                    top: 30, left: 20,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  _buildPromoBanner(),
+                  const SizedBox(height: 25),
+                  const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
                       children: [
-                        const Text("30% OFF", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                        const Text("On all electronics", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent),
-                          child: const Text("Shop Now"),
-                        )
+                        _categoryChip("All"),
+                        _categoryChip("Furniture"),
+                        _categoryChip("Electronics"),
+                        _categoryChip("Fashion"),
+                        _categoryChip("Shoes"),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 25),
+                  Text("$selectedCategory Products", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 220, // Fits 2 on phone, 3-4 on tablet
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 20,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final p = filteredProducts[index];
+                      return FigmaProductCard(product: p);
+                    },
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 25),
-
-            // Categories
-            const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 15),
-            SizedBox(
-              height: 40,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _categoryChip("All", true),
-                  _categoryChip("Electronics", false),
-                  _categoryChip("Fashion", false),
-                  _categoryChip("Shoes", false),
-                  _categoryChip("Home", false),
-                ],
-              ),
-            ),
-            const SizedBox(height: 25),
-
-            // Product Grid
-            const Text("Popular Products", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 15),
-
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-              ),
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(0.1),
-                            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          child: const Center(child: Icon(Icons.image, size: 50, color: Colors.blueAccent)),
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Product Name", style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text("\$99.00", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                );
-              },
             ),
           ],
         ),
@@ -195,19 +249,108 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _categoryChip(String title, bool isSelected) {
+  Widget _buildPromoBanner() {
     return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      width: double.infinity, height: 150,
       decoration: BoxDecoration(
-        color: isSelected ? Colors.blueAccent : Colors.white,
         borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(colors: [Colors.blueAccent, Colors.cyanAccent]),
       ),
-      child: Center(
-        child: Text(
-          title,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold),
+      child: Stack(
+        children: [
+          Positioned(
+            top: 30, left: 20,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("30% OFF", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                const Text("On all furniture", style: TextStyle(color: Colors.white70, fontSize: 16)),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.blueAccent),
+                  child: const Text("Shop Now"),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _categoryChip(String title) {
+    bool isSelected = selectedCategory == title;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedCategory = title;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blueAccent : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
         ),
+        child: Center(child: Text(title, style: TextStyle(color: isSelected ? Colors.white : Colors.black, fontWeight: FontWeight.bold))),
+      ),
+    );
+  }
+}
+
+class WishlistScreen extends ConsumerWidget {
+  const WishlistScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final wishlist = ref.watch(wishlistProvider);
+
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text("My Wishlist", 
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+          ),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(25),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
+              ),
+              child: wishlist.isEmpty
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.favorite_border, size: 80, color: Colors.grey),
+                          SizedBox(height: 10),
+                          Text("Your Wishlist is Empty", style: TextStyle(color: Colors.grey, fontSize: 18)),
+                        ],
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 220,
+                        childAspectRatio: 0.65,
+                        crossAxisSpacing: 15,
+                        mainAxisSpacing: 20,
+                      ),
+                      itemCount: wishlist.length,
+                      itemBuilder: (context, index) {
+                        final p = wishlist[index];
+                        return FigmaProductCard(product: p);
+                      },
+                    ),
+            ),
+          ),
+        ],
       ),
     );
   }

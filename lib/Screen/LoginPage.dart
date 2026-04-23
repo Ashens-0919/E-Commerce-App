@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../auth_controller.dart';
 import 'EnterContactpage.dart';
 import 'VerifyCode.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController contactController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
@@ -49,16 +51,45 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() => isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+    
+    final auth = ref.read(authControllerProvider.notifier);
+    
+    // Determine if it's email or phone to call the correct mock method
+    if (_isValidEmail(contact)) {
+      await auth.sendEmailOtp(
+        email: contact,
+        onCodeSent: (verId) => _navigateToVerify(verId, contact),
+        onError: (err) => _handleAuthError(err),
+      );
+    } else {
+      await auth.sendOtp(
+        contact: contact,
+        onCodeSent: (verId) => _navigateToVerify(verId, contact),
+        onError: (err) => _handleAuthError(err),
+      );
+    }
+  }
 
+  void _navigateToVerify(String verificationId, String contact, {bool isForgot = false}) {
     if (mounted) {
       setState(() => isLoading = false);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const VerifyCode(verificationId: "login_session_123"),
+          builder: (context) => VerifyCode(
+            verificationId: verificationId,
+            contact: contact,
+            isForgotPassword: isForgot,
+          ),
         ),
       );
+    }
+  }
+
+  void _handleAuthError(String error) {
+    if (mounted) {
+      setState(() => isLoading = false);
+      _showError(error);
     }
   }
 
@@ -165,19 +196,30 @@ class _LoginPageState extends State<LoginPage> {
                       Align(
                         alignment: Alignment.center,
                         child: TextButton(
-                          onPressed: () {
-                            if (contactController.text.isEmpty) {
+                          onPressed: () async {
+                            String contact = contactController.text.trim();
+                            if (contact.isEmpty) {
                               _showError("Enter your Email/Phone to reset password");
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const VerifyCode(
-                                    verificationId: "reset_456",
-                                    isForgotPassword: true,
-                                  ),
-                                ),
+                              return;
+                            }
+                            
+                            setState(() => isLoading = true);
+                            final auth = ref.read(authControllerProvider.notifier);
+                            
+                            if (_isValidEmail(contact)) {
+                              await auth.sendEmailOtp(
+                                email: contact,
+                                onCodeSent: (verId) => _navigateToVerify(verId, contact, isForgot: true),
+                                onError: (err) => _handleAuthError(err),
                               );
+                            } else if (_isValidPhone(contact)) {
+                              await auth.sendOtp(
+                                contact: contact,
+                                onCodeSent: (verId) => _navigateToVerify(verId, contact, isForgot: true),
+                                onError: (err) => _handleAuthError(err),
+                              );
+                            } else {
+                              _handleAuthError("Please enter a valid email or phone");
                             }
                           },
                           child: const Text("Forgot Password?",
@@ -206,7 +248,7 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _socialButton("assets/logo.PNG ", Icons.g_mobiledata),
+                          _socialButton("assets/logo.PNG", Icons.g_mobiledata),
                           const SizedBox(width: 30),
                           _socialButton("assets/facebook.png", Icons.facebook),
                         ],
