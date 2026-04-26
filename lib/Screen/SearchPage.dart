@@ -16,15 +16,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final allProducts = ref.watch(productsProvider);
+    final productsAsync = ref.watch(productsProvider);
     final history = ref.watch(searchHistoryProvider);
     final query = ref.watch(searchQueryProvider);
-
-    List<Map<String, dynamic>> filteredProducts = allProducts
-        .where((product) =>
-            product['name']!.toString().toLowerCase().contains(query.toLowerCase()) ||
-            product['category']!.toString().toLowerCase().contains(query.toLowerCase()))
-        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -58,31 +52,43 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          const Divider(height: 1),
-          if (query.isEmpty) ...[
-            _buildHistorySection(history),
-            _buildPopularSection(),
-          ] else
-            Expanded(
-              child: filteredProducts.isEmpty
-                  ? _buildEmptyState()
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(15),
-                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 220,
-                        childAspectRatio: 0.65,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
-                      itemCount: filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        return FigmaProductCard(product: filteredProducts[index]);
-                      },
-                    ),
-            ),
-        ],
+      body: productsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("Error loading products: $err")),
+        data: (allProducts) {
+          List<Map<String, dynamic>> filteredProducts = allProducts
+              .where((product) =>
+                  product['name']!.toString().toLowerCase().contains(query.toLowerCase()) ||
+                  product['category']!.toString().toLowerCase().contains(query.toLowerCase()))
+              .toList();
+
+          return Column(
+            children: [
+              const Divider(height: 1),
+              if (query.isEmpty) ...[
+                _buildHistorySection(history),
+                _buildPopularSection(),
+              ] else
+                Expanded(
+                  child: filteredProducts.isEmpty
+                      ? _buildEmptyState()
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(15),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 220,
+                            childAspectRatio: 0.65,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemCount: filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            return FigmaProductCard(product: filteredProducts[index]);
+                          },
+                        ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

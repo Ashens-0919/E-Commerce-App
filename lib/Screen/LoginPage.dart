@@ -54,13 +54,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     
     final auth = ref.read(authControllerProvider.notifier);
     
-    // Determine if it's email or phone to call the correct mock method
+    // Determine if it's email or phone to call the correct method
     if (_isValidEmail(contact)) {
-      await auth.sendEmailOtp(
-        email: contact,
-        onCodeSent: (verId) => _navigateToVerify(verId, contact),
-        onError: (err) => _handleAuthError(err),
-      );
+      _showError("Email login is currently disabled. Please use Phone.");
+      setState(() => isLoading = false);
     } else {
       await auth.sendOtp(
         contact: contact,
@@ -207,11 +204,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             final auth = ref.read(authControllerProvider.notifier);
                             
                             if (_isValidEmail(contact)) {
-                              await auth.sendEmailOtp(
-                                email: contact,
-                                onCodeSent: (verId) => _navigateToVerify(verId, contact, isForgot: true),
-                                onError: (err) => _handleAuthError(err),
-                              );
+                              _showError("Email reset is currently disabled. Please use Phone.");
                             } else if (_isValidPhone(contact)) {
                               await auth.sendOtp(
                                 contact: contact,

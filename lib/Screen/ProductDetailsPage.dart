@@ -62,10 +62,24 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(20),
+                image: (widget.product['imageUrl'] != null)
+                  ? DecorationImage(
+                      image: NetworkImage(widget.product['imageUrl']),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
               ),
-              child: Center(
-                child: Icon(widget.product['icon'] as IconData, size: 120, color: Colors.grey[400]),
-              ),
+              child: (widget.product['imageUrl'] == null)
+                ? Center(
+                    child: Icon(
+                      widget.product['icon'] is IconData 
+                        ? widget.product['icon'] 
+                        : Icons.shopping_bag_outlined, 
+                      size: 120, 
+                      color: Colors.grey[400]
+                    ),
+                  )
+                : null,
             ),
             const SizedBox(height: 15),
 

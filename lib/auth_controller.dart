@@ -1,11 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UserModel {
   final String uid;
-  final String contact;
-  final String name;
+  final String? contact;
+  final String? name;
 
-  UserModel({required this.uid, required this.contact, this.name = "Verified User"});
+  UserModel({required this.uid, this.contact, this.name = "Verified User"});
 }
 
 final authControllerProvider = StateNotifierProvider<AuthController, UserModel?>((ref) {
@@ -13,7 +14,18 @@ final authControllerProvider = StateNotifierProvider<AuthController, UserModel?>
 });
 
 class AuthController extends StateNotifier<UserModel?> {
-  AuthController() : super(null);
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  AuthController() : super(null) {
+    // Listen to Auth State Changes
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        state = UserModel(uid: user.uid, contact: user.phoneNumber, name: user.displayName);
+      } else {
+        state = null;
+      }
+    });
+  }
 
   // Send OTP to Phone
   Future<void> sendOtp({
@@ -22,22 +34,19 @@ class AuthController extends StateNotifier<UserModel?> {
     required Function(String error) onError,
   }) async {
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      onCodeSent("phone_verify_session_123"); 
-    } catch (e) {
-      onError(e.toString());
-    }
-  }
-
-  // Send OTP to Email
-  Future<void> sendEmailOtp({
-    required String email,
-    required Function(String verificationId) onCodeSent,
-    required Function(String error) onError,
-  }) async {
-    try {
-      await Future.delayed(const Duration(seconds: 2));
-      onCodeSent("email_verify_session_123"); 
+      await _auth.verifyPhoneNumber(
+        phoneNumber: contact,
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          await _auth.signInWithCredential(credential);
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          onError(e.message ?? "Verification failed");
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          onCodeSent(verificationId);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
     } catch (e) {
       onError(e.toString());
     }
@@ -47,23 +56,24 @@ class AuthController extends StateNotifier<UserModel?> {
   Future<void> verifyOtp({
     required String verificationId,
     required String smsCode,
-    required String contact, // Added to create the user model
+    required String contact,
     required Function() onSuccess,
     required Function(String error) onError,
   }) async {
     try {
-      if (smsCode == "123456") {
-        state = UserModel(uid: "user_abc_123", contact: contact);
-        onSuccess();
-      } else {
-        onError("Invalid code (Try 123456)");
-      }
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: smsCode,
+      );
+      await _auth.signInWithCredential(credential);
+      onSuccess();
     } catch (e) {
       onError(e.toString());
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await _auth.signOut();
     state = null;
   }
 }

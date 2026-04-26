@@ -26,10 +26,24 @@ class FigmaProductCard extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(15),
+                    image: (product['imageUrl'] != null) 
+                      ? DecorationImage(
+                          image: NetworkImage(product['imageUrl']),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                   ),
-                  child: Center(
-                    child: Icon(product['icon'] as IconData, size: 60, color: Colors.grey[400]),
-                  ),
+                  child: (product['imageUrl'] == null) 
+                    ? Center(
+                        child: Icon(
+                          product['icon'] is IconData 
+                            ? product['icon'] 
+                            : Icons.shopping_bag_outlined, 
+                          size: 60, 
+                          color: Colors.grey[400]
+                        ),
+                      )
+                    : null,
                 ),
                 Positioned(
                   top: 10, right: 10,

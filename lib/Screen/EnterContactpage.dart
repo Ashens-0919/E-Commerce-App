@@ -306,24 +306,8 @@ class _EnterContactPageState extends ConsumerState<EnterContactPage> {
         },
       );
     } else {
-      await auth.sendEmailOtp(
-        email: contact,
-        onCodeSent: (verificationId) {
-          if (mounted) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyCode(
-              verificationId: verificationId,
-              contact: contact,
-            )));
-            setState(() => isLoading = false);
-          }
-        },
-        onError: (error) {
-          if (mounted) {
-            _showError(error);
-            setState(() => isLoading = false);
-          }
-        },
-      );
+      _showError("Email signup is currently disabled. Please use Phone.");
+      setState(() => isLoading = false);
     }
   }
 }

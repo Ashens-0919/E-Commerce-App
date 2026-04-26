@@ -34,7 +34,10 @@ class ProfilePage extends ConsumerWidget {
                   const Text("My Account", 
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
                   Container(
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2), 
+                      borderRadius: BorderRadius.circular(10)
+                    ),
                     padding: const EdgeInsets.all(8),
                     child: const Icon(Icons.settings_outlined, color: Colors.white),
                   )
@@ -65,10 +68,10 @@ class ProfilePage extends ConsumerWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(isLoggedIn ? user.name : "Guest User", 
+                              Text(isLoggedIn ? (user.name ?? "Verified User") : "Guest User", 
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 4),
-                              Text(isLoggedIn ? user.contact : "Login to save your progress", 
+                              Text(isLoggedIn ? (user.contact ?? "No Phone") : "Login to save your progress",
                                 style: const TextStyle(color: Colors.grey, fontSize: 13)),
                             ],
                           ),

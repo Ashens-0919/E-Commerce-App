@@ -9,7 +9,7 @@ class WishlistPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wishlist = ref.watch(wishlistProvider);
-    final allProducts = ref.watch(productsProvider);
+    final productsAsync = ref.watch(productsProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -19,23 +19,29 @@ class WishlistPage extends ConsumerWidget {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: wishlist.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: wishlist.length,
-              itemBuilder: (context, index) {
-                final item = wishlist[index];
-                // Sync with productsProvider to check current stock status
-                final currentProduct = allProducts.firstWhere(
-                  (p) => p['id'] == item['id'],
-                  orElse: () => item,
-                );
-                final bool isOutOfStock = currentProduct['outOfStock'] ?? false;
+      body: productsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text("Error: $err")),
+        data: (allProducts) {
+          return wishlist.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: wishlist.length,
+                  itemBuilder: (context, index) {
+                    final item = wishlist[index];
+                    // Sync with productsProvider to check current stock status
+                    final currentProduct = allProducts.firstWhere(
+                      (p) => p['id'] == item['id'],
+                      orElse: () => item,
+                    );
+                    final bool isOutOfStock = currentProduct['outOfStock'] ?? false;
 
-                return _buildWishlistItem(context, ref, currentProduct, isOutOfStock);
-              },
-            ),
+                    return _buildWishlistItem(context, ref, currentProduct, isOutOfStock);
+                  },
+                );
+        },
+      ),
     );
   }
 
