@@ -38,6 +38,10 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     state = state.where((item) => item.id != id).toList();
   }
 
+  void clearCart() {
+    state = [];
+  }
+
   void updateQuantity(String id, int delta) {
     state = [
       for (final item in state)

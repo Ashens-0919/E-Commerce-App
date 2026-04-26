@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../cart_provider.dart';
-
+import 'CheckoutPage.dart';
 import '../wishlist_provider.dart';
 
 class ProductDetailsPage extends ConsumerStatefulWidget {
@@ -79,13 +79,13 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                 ),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
+              child: const Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.view_in_ar, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    const Text("View in Your Space (AR)", 
+                    Icon(Icons.view_in_ar, color: Colors.white, size: 20),
+                    SizedBox(width: 8),
+                    Text("View in Your Space (AR)", 
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -144,9 +144,12 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                   style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  "Instock",
-                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                Text(
+                  widget.product['outOfStock'] == true ? "Out of Stock" : "In Stock",
+                  style: TextStyle(
+                    color: widget.product['outOfStock'] == true ? Colors.red : Colors.green,
+                    fontWeight: FontWeight.bold
+                  ),
                 ),
               ],
             ),
@@ -198,29 +201,77 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))
           ],
         ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: ElevatedButton(
-            onPressed: () {
-              ref.read(cartProvider.notifier).addToCart(CartItem(
-                id: widget.product['id'],
-                name: "${widget.product['name']} ($selectedVariant)",
-                price: widget.product['price'],
-                icon: widget.product['icon'],
-              ));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("${widget.product['name']} added to cart!")),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0D0D2B), // Very dark navy/black
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: widget.product['outOfStock'] == true
+          ? SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ref.read(wishlistProvider.notifier).toggleWishlist(widget.product);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("${widget.product['name']} added to wishlist!")),
+                  );
+                },
+                icon: const Icon(Icons.favorite_border, color: Colors.white),
+                label: const Text("Add to Wishlist", 
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 60,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        ref.read(cartProvider.notifier).addToCart(CartItem(
+                          id: widget.product['id'],
+                          name: "${widget.product['name']} ($selectedVariant)",
+                          price: widget.product['price'],
+                          icon: widget.product['icon'],
+                        ));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("${widget.product['name']} added to cart!")),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF0D0D2B), width: 2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Add to Cart", 
+                        style: TextStyle(color: Color(0xFF0D0D2B), fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: SizedBox(
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Buy Now logic: Navigate directly to checkout with this product
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CheckoutPage(singleProduct: widget.product),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D0D2B),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text("Buy Now", 
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            child: const Text("Add to Cart", 
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
-          ),
-        ),
       ),
     );
   }

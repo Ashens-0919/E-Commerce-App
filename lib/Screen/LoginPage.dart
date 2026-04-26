@@ -119,15 +119,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             children: <Widget>[
               // Adaptive Header Space
               SizedBox(height: size.height * 0.12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Log in",
+                    Text("Log in",
                         style: TextStyle(color: Colors.white, fontSize: 45, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    const Text("Welcome Back!",
+                    SizedBox(height: 10),
+                    Text("Welcome Back!",
                         style: TextStyle(color: Colors.white, fontSize: 18)),
                   ],
                 ),
