@@ -1,4 +1,4 @@
-# sign_up
+# E-Commerce App
 
 A new Flutter project.
 
