@@ -21,7 +21,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const WishlistScreen(), // Replaced Search Tab with Wishlist
+    const WishlistScreen(), 
     const CartPage(),
     const ProfilePage(),
   ];
@@ -85,127 +85,119 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authControllerProvider);
-    final productsAsync = ref.watch(productsProvider);
+    final allProducts = ref.watch(productsProvider);
     final isLoggedIn = user != null;
 
-    return productsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text("Error: $err")),
-      data: (allProducts) {
-        List<Map<String, dynamic>> filteredProducts = selectedCategory == "All"
-            ? allProducts
-            : allProducts.where((p) => p['category'] == selectedCategory).toList();
+    List<Map<String, dynamic>> filteredProducts = selectedCategory == "All"
+        ? allProducts
+        : allProducts.where((p) => p['category'] == selectedCategory).toList();
 
-        return SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(isLoggedIn ? "Welcome back, ${user.name}!" : "Hello, Guest!",
-                            style: const TextStyle(fontSize: 14, color: Colors.white70)),
-                          const Text("Find your best gear", 
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
-                        ],
-                      ),
-                      Container(
-                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(Icons.notifications_none, color: Colors.white),
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 25),
-
-                // Functional Search Bar (Now opens full screen SearchPage)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SearchPage()),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.search, color: Colors.blueAccent),
-                          SizedBox(width: 10),
-                          Text("Search products...", style: TextStyle(color: Colors.grey)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 25),
-
-                // Content Area
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(25),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
-                  ),
-                  child: Column(
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPromoBanner(),
-                      const SizedBox(height: 25),
-                      const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15),
-                      SizedBox(
-                        height: 40,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            _categoryChip("All"),
-                            _categoryChip("Furniture"),
-                            _categoryChip("Electronics"),
-                            _categoryChip("Fashion"),
-                            _categoryChip("Shoes"),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      Text("$selectedCategory Products", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 220, // Fits 2 on phone, 3-4 on tablet
-                          childAspectRatio: 0.65,
-                          crossAxisSpacing: 15,
-                          mainAxisSpacing: 20,
-                        ),
-                        itemCount: filteredProducts.length,
-                        itemBuilder: (context, index) {
-                          final p = filteredProducts[index];
-                          return FigmaProductCard(product: p);
-                        },
-                      ),
+                      Text(isLoggedIn ? "Welcome back, ${user.name ?? "User"}!" : "Hello, Guest!",
+                        style: const TextStyle(fontSize: 14, color: Colors.white70)),
+                      const Text("Find your best gear", 
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ],
+                  ),
+                  Container(
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.all(8),
+                    child: const Icon(Icons.notifications_none, color: Colors.white),
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 25),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SearchPage()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.search, color: Colors.blueAccent),
+                      SizedBox(width: 10),
+                      Text("Search products...", style: TextStyle(color: Colors.grey)),
                     ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 25),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(25),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildPromoBanner(),
+                  const SizedBox(height: 25),
+                  const Text("Categories", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    height: 40,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _categoryChip("All"),
+                        _categoryChip("Furniture"),
+                        _categoryChip("Electronics"),
+                        _categoryChip("Fashion"),
+                        _categoryChip("Shoes"),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  Text("$selectedCategory Products", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 15),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 220, 
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 20,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final p = filteredProducts[index];
+                      return FigmaProductCard(product: p);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

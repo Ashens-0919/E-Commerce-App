@@ -9,7 +9,7 @@ class WishlistPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wishlist = ref.watch(wishlistProvider);
-    final productsAsync = ref.watch(productsProvider);
+    final allProducts = ref.watch(productsProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -19,29 +19,23 @@ class WishlistPage extends ConsumerWidget {
         foregroundColor: Colors.black,
         elevation: 0,
       ),
-      body: productsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text("Error: $err")),
-        data: (allProducts) {
-          return wishlist.isEmpty
-              ? _buildEmptyState()
-              : ListView.builder(
-                  padding: const EdgeInsets.all(10),
-                  itemCount: wishlist.length,
-                  itemBuilder: (context, index) {
-                    final item = wishlist[index];
-                    // Sync with productsProvider to check current stock status
-                    final currentProduct = allProducts.firstWhere(
-                      (p) => p['id'] == item['id'],
-                      orElse: () => item,
-                    );
-                    final bool isOutOfStock = currentProduct['outOfStock'] ?? false;
-
-                    return _buildWishlistItem(context, ref, currentProduct, isOutOfStock);
-                  },
+      body: wishlist.isEmpty
+          ? _buildEmptyState()
+          : ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: wishlist.length,
+              itemBuilder: (context, index) {
+                final item = wishlist[index];
+                // Sync with productsProvider to check current stock status
+                final currentProduct = allProducts.firstWhere(
+                  (p) => p['id'] == item['id'],
+                  orElse: () => item,
                 );
-        },
-      ),
+                final bool isOutOfStock = currentProduct['outOfStock'] ?? false;
+
+                return _buildWishlistItem(context, ref, currentProduct, isOutOfStock);
+              },
+            ),
     );
   }
 
@@ -82,7 +76,7 @@ class WishlistPage extends ConsumerWidget {
                 children: [
                   Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 5),
-                  Text("₱${item['price']}", style: TextStyle(color: Colors.orange[800], fontWeight: FontWeight.bold)),
+                  Text("\$${item['price']}", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 5),
                   
                   // Stock Status Indicator
@@ -117,13 +111,6 @@ class WishlistPage extends ConsumerWidget {
                     );
                   },
                 ),
-                if (!isOutOfStock)
-                  IconButton(
-                    icon: Icon(Icons.add_shopping_cart, color: Colors.orange[800]),
-                    onPressed: () {
-                      // Add to cart logic could be triggered here
-                    },
-                  ),
               ],
             ),
           ],

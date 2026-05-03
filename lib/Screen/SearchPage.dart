@@ -16,9 +16,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productsProvider);
+    final allProducts = ref.watch(productsProvider);
     final history = ref.watch(searchHistoryProvider);
     final query = ref.watch(searchQueryProvider);
+
+    List<Map<String, dynamic>> filteredProducts = allProducts
+        .where((product) =>
+            product['name']!.toString().toLowerCase().contains(query.toLowerCase()) ||
+            product['category']!.toString().toLowerCase().contains(query.toLowerCase()))
+        .toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -37,7 +43,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             ref.read(searchHistoryProvider.notifier).addSearch(val);
           },
           decoration: const InputDecoration(
-            hintText: "Search on Shopee-Clone",
+            hintText: "Search products...",
             border: InputBorder.none,
           ),
         ),
@@ -52,43 +58,31 @@ class _SearchPageState extends ConsumerState<SearchPage> {
             ),
         ],
       ),
-      body: productsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text("Error loading products: $err")),
-        data: (allProducts) {
-          List<Map<String, dynamic>> filteredProducts = allProducts
-              .where((product) =>
-                  product['name']!.toString().toLowerCase().contains(query.toLowerCase()) ||
-                  product['category']!.toString().toLowerCase().contains(query.toLowerCase()))
-              .toList();
-
-          return Column(
-            children: [
-              const Divider(height: 1),
-              if (query.isEmpty) ...[
-                _buildHistorySection(history),
-                _buildPopularSection(),
-              ] else
-                Expanded(
-                  child: filteredProducts.isEmpty
-                      ? _buildEmptyState()
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(15),
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 220,
-                            childAspectRatio: 0.65,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
-                          itemCount: filteredProducts.length,
-                          itemBuilder: (context, index) {
-                            return FigmaProductCard(product: filteredProducts[index]);
-                          },
-                        ),
-                ),
-            ],
-          );
-        },
+      body: Column(
+        children: [
+          const Divider(height: 1),
+          if (query.isEmpty) ...[
+            _buildHistorySection(history),
+            _buildPopularSection(),
+          ] else
+            Expanded(
+              child: filteredProducts.isEmpty
+                  ? _buildEmptyState()
+                  : GridView.builder(
+                      padding: const EdgeInsets.all(15),
+                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 220,
+                        childAspectRatio: 0.65,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: filteredProducts.length,
+                      itemBuilder: (context, index) {
+                        return FigmaProductCard(product: filteredProducts[index]);
+                      },
+                    ),
+            ),
+        ],
       ),
     );
   }
@@ -119,23 +113,37 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   Widget _buildPopularSection() {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(15),
           child: Text("Popular Searches", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
-        // Add some hardcoded popular tags
         Wrap(
           children: [
-            _PopularTag(text: "iPhone 15"),
-            _PopularTag(text: "Sofa"),
-            _PopularTag(text: "Shoes"),
-            _PopularTag(text: "Headphones"),
+            _popularTag("iPhone 15"),
+            _popularTag("Sofa"),
+            _popularTag("Shoes"),
+            _popularTag("Headphones"),
           ],
         )
       ],
+    );
+  }
+
+  Widget _popularTag(String text) {
+    return GestureDetector(
+      onTap: () {
+        _searchController.text = text;
+        ref.read(searchQueryProvider.notifier).state = text;
+      },
+      child: Container(
+        margin: const EdgeInsets.only(left: 15, bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(5)),
+        child: Text(text),
+      ),
     );
   }
 
@@ -163,21 +171,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           const Text("No products found", style: TextStyle(color: Colors.grey)),
         ],
       ),
-    );
-  }
-}
-
-class _PopularTag extends StatelessWidget {
-  final String text;
-  const _PopularTag({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(left: 15, bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey[300]!), borderRadius: BorderRadius.circular(5)),
-      child: Text(text),
     );
   }
 }

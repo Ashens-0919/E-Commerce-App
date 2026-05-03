@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'auth_controller.dart';
-import 'firestore_service.dart';
 
 class CartItem {
   final String id;
@@ -13,23 +11,7 @@ class CartItem {
 }
 
 class CartNotifier extends StateNotifier<List<CartItem>> {
-  final Ref ref;
-  
-  CartNotifier(this.ref) : super([]) {
-    // Automatically load cart when user changes
-    ref.listen(authControllerProvider, (previous, next) {
-      if (next != null) {
-        _loadCart(next.uid);
-      } else {
-        state = [];
-      }
-    });
-  }
-
-  Future<void> _loadCart(String userId) async {
-    final cart = await FirestoreService().getCart(userId);
-    state = cart;
-  }
+  CartNotifier() : super([]);
 
   void addToCart(CartItem item) {
     final existingIndex = state.indexWhere((i) => i.id == item.id);
@@ -50,17 +32,14 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     } else {
       state = [...state, item];
     }
-    _syncWithFirestore();
   }
 
   void removeFromCart(String id) {
     state = state.where((item) => item.id != id).toList();
-    _syncWithFirestore();
   }
 
   void clearCart() {
     state = [];
-    _syncWithFirestore();
   }
 
   void updateQuantity(String id, int delta) {
@@ -77,17 +56,9 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
         else
           item
     ];
-    _syncWithFirestore();
-  }
-
-  void _syncWithFirestore() {
-    final user = ref.read(authControllerProvider);
-    if (user != null) {
-      FirestoreService().saveCart(user.uid, state);
-    }
   }
 
   double get totalAmount => state.fold(0, (sum, item) => sum + (item.price * item.quantity));
 }
 
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) => CartNotifier(ref));
+final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) => CartNotifier());
