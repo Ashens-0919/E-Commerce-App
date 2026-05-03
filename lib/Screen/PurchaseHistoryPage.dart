@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../orders_provider.dart';
+import '../Provider/OrdersProvider.dart';
 
 class PurchaseHistoryPage extends ConsumerWidget {
   const PurchaseHistoryPage({super.key});

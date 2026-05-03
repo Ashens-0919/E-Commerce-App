@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../auth_controller.dart';
-import '../orders_provider.dart';
+import '../Controller/AuthController.dart';
+import '../Provider/OrdersProvider.dart';
 import 'LoginPage.dart';
 import 'MyOrdersPage.dart';
 import 'ShippingAddressPage.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../auth_controller.dart';
+import '../Controller/AuthController.dart';
 import 'ResetPasswordPage.dart';
 import 'DashboardPage.dart';
 

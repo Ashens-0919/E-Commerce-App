@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../cart_provider.dart';
+import '../Provider/CartProvider.dart';
 import 'CheckoutPage.dart';
 
 class CartPage extends ConsumerStatefulWidget {
