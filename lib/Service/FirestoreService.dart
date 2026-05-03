@@ -15,7 +15,6 @@ class FirestoreService {
       await ref.putFile(imageFile);
       return await ref.getDownloadURL();
     } catch (e) {
-      print("Error uploading image: $e");
       return null;
     }
   }
@@ -37,12 +36,12 @@ class FirestoreService {
 
   // Save cart to Firestore
   Future<void> saveCart(String userId, List<CartItem> cartItems) async {
-    final cartData = cartItems.map((item) => {
+    final List<Map<String, dynamic>> cartData = cartItems.map((item) => {
       'id': item.id,
       'name': item.name,
       'price': item.price,
       'quantity': item.quantity,
-      'iconCode': (item.icon is int) ? item.icon : null, // Store icon code if it's an icon
+      'iconCode': (item.icon is int) ? item.icon : null,
     }).toList();
 
     await _db.collection('users').doc(userId).set({
@@ -55,14 +54,17 @@ class FirestoreService {
     final doc = await _db.collection('users').doc(userId).get();
     if (!doc.exists || doc.data()?['cart'] == null) return [];
 
-    final List<dynamic> cartData = doc.data()!['cart'];
-    return cartData.map((item) => CartItem(
-      id: item['id'],
-      name: item['name'],
-      price: item['price'].toDouble(),
-      quantity: item['quantity'],
-      icon: item['iconCode'],
-    )).toList();
+    final List<dynamic> cartData = doc.data()!['cart'] as List<dynamic>;
+    return cartData.map((item) {
+      final Map<String, dynamic> map = Map<String, dynamic>.from(item as Map);
+      return CartItem(
+        id: map['id'] as String? ?? '',
+        name: map['name'] as String? ?? '',
+        price: (map['price'] as num? ?? 0.0).toDouble(),
+        quantity: map['quantity'] as int? ?? 1,
+        icon: map['iconCode'],
+      );
+    }).toList();
   }
 
   // --- Initial Data Seeding ---
@@ -70,7 +72,6 @@ class FirestoreService {
   Future<void> seedProducts(List<Map<String, dynamic>> products) async {
     final batch = _db.batch();
     for (var product in products) {
-      // Convert IconData to something Firestore can store (like a code point)
       final productToStore = Map<String, dynamic>.from(product);
       if (productToStore['icon'] != null) {
         productToStore['iconCode'] = productToStore['icon'].codePoint;
