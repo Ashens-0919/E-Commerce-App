@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Provider/OrdersProvider.dart';
+import 'package:e_commerce_app/Provider/OrdersProvider.dart';
 
 class OrderTrackingPage extends StatelessWidget {
   final OrderItem order;

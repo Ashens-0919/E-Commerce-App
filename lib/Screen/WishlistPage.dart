@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Provider/WishlistProvider.dart';
-import '../Provider/ProductsProvider.dart';
+import 'package:e_commerce_app/Provider/WishlistProvider.dart';
+import 'package:e_commerce_app/Provider/ProductsProvider.dart';
 
 class WishlistPage extends ConsumerWidget {
   const WishlistPage({super.key});

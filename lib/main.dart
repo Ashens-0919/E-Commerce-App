@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'Config/FirebaseOptions.dart';
+import 'package:e_commerce_app/Config/FirebaseOptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Screen/DashboardPage.dart';

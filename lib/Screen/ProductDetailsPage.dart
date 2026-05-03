@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Provider/CartProvider.dart';
+import 'package:e_commerce_app/Provider/CartProvider.dart';
 import 'CheckoutPage.dart';
-import '../Provider/WishlistProvider.dart';
+import 'package:e_commerce_app/Provider/WishlistProvider.dart';
 
 class ProductDetailsPage extends ConsumerStatefulWidget {
   final Map<String, dynamic> product;

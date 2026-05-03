@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/FigmaProductCard.dart';
-import '../Provider/ProductsProvider.dart';
-import '../Provider/SearchProvider.dart';
+import 'package:e_commerce_app/Provider/ProductsProvider.dart';
+import 'package:e_commerce_app/Provider/SearchProvider.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});

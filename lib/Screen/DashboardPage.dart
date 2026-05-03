@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Controller/AuthController.dart';
-import '../Provider/CartProvider.dart';
-import '../Provider/ProductsProvider.dart';
+import 'package:e_commerce_app/Controller/AuthController.dart';
+import 'package:e_commerce_app/Provider/CartProvider.dart';
+import 'package:e_commerce_app/Provider/ProductsProvider.dart';
 import 'ProfilePage.dart';
 import 'SearchPage.dart';
 import 'CartPage.dart';
 import '../widgets/FigmaProductCard.dart';
-import '../Provider/WishlistProvider.dart';
+import 'package:e_commerce_app/Provider/WishlistProvider.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});

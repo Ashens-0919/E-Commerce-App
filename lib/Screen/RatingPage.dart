@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Provider/OrdersProvider.dart';
+import 'package:e_commerce_app/Provider/OrdersProvider.dart';
 
 class RatingPage extends ConsumerWidget {
   const RatingPage({super.key});

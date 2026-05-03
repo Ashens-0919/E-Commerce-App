@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Provider/AddressProvider.dart';
+import 'package:e_commerce_app/Provider/AddressProvider.dart';
 
 class ShippingAddressPage extends ConsumerWidget {
   const ShippingAddressPage({super.key});

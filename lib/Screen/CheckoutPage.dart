@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../Provider/OrdersProvider.dart';
-import '../Provider/CartProvider.dart';
-import '../Provider/AddressProvider.dart';
+import 'package:e_commerce_app/Provider/OrdersProvider.dart';
+import 'package:e_commerce_app/Provider/CartProvider.dart';
+import 'package:e_commerce_app/Provider/AddressProvider.dart';
 import 'ShippingAddressPage.dart';
 
 class CheckoutPage extends ConsumerStatefulWidget {
